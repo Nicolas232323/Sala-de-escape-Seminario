@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Sala de Escape - Redes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <canvas id="particles-bg"></canvas>
     <div class="container">
         <h1>Sala de Escape - Redes</h1>
         <div id="nivel-actual"></div>
@@ -19,12 +21,15 @@
         <div id="resultado"></div>
         
         <!-- Nuevo div para el ingreso del código -->
-        <div id="codigo-container" class="hidden">
-            <h3>Ingresa el código para avanzar al siguiente nivel</h3>
+        <div id="codigo-container" style="display: none;">
             <input type="number" id="codigo-input" placeholder="Ingresa el código">
-            <button id="verificar-codigo">Verificar Código</button>
+            <button id="verificar-codigo">VERIFICAR CÓDIGO</button>
+        </div>
+        <div id="texto-codigo" style="display: none;">
+            Ingresa el código para avanzar al siguiente nivel
         </div>
     </div>
     <script src="script.js"></script>
+    <script src="particles.js"></script>
 </body>
 </html> 

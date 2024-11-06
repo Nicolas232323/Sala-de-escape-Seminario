@@ -78,8 +78,8 @@ function mostrarNivel(nivel) {
     const preguntasContainer = document.getElementById('preguntas');
     preguntasContainer.innerHTML = '';
     
-    // Ocultar el contenedor del código
-    document.getElementById('codigo-container').classList.add('hidden');
+    // Ocultar el contenedor de código cada vez que se muestra un nuevo nivel
+    ocultarContenedorCodigo();
     
     niveles[nivel].preguntas.forEach((pregunta, index) => {
         const preguntaDiv = document.createElement('div');
@@ -102,6 +102,74 @@ function mostrarNivel(nivel) {
     });
 }
 
+function generarEcuacionAlgebraica() {
+    const tiposEcuaciones = [
+        // ax = b (asegurando que b sea divisible por a)
+        {
+            generar: () => {
+                const a = Math.floor(Math.random() * 8) + 2; // 2 a 9
+                const resultado = Math.floor(Math.random() * 10) + 1; // 1 a 10
+                return {
+                    ecuacion: `${a}x = ${a * resultado}`,
+                    resultado: resultado
+                };
+            }
+        },
+        // x/a = b (asegurando que el resultado sea b*a)
+        {
+            generar: () => {
+                const a = Math.floor(Math.random() * 5) + 2; // 2 a 6
+                const b = Math.floor(Math.random() * 5) + 1; // 1 a 5
+                return {
+                    ecuacion: `x/${a} = ${b}`,
+                    resultado: a * b
+                };
+            }
+        },
+        // ax + b = c (asegurando que (c-b) sea divisible por a)
+        {
+            generar: () => {
+                const a = Math.floor(Math.random() * 5) + 2; // 2 a 6
+                const resultado = Math.floor(Math.random() * 8) + 1; // 1 a 8
+                const b = Math.floor(Math.random() * 10) + 1; // 1 a 10
+                return {
+                    ecuacion: `${a}x + ${b} = ${a * resultado + b}`,
+                    resultado: resultado
+                };
+            }
+        },
+        // x² = a² (asegurando que la raíz sea entera)
+        {
+            generar: () => {
+                const resultado = Math.floor(Math.random() * 6) + 2; // 2 a 7
+                return {
+                    ecuacion: `x² = ${resultado * resultado}`,
+                    resultado: resultado
+                };
+            }
+        }
+    ];
+
+    // Seleccionar tipo de ecuación basado en el nivel
+    let ecuacionesDisponibles;
+    switch (nivelActual) {
+        case 0: // Nivel 1: ecuaciones más simples
+            ecuacionesDisponibles = [tiposEcuaciones[0], tiposEcuaciones[1]];
+            break;
+        case 1: // Nivel 2: ecuaciones intermedias
+            ecuacionesDisponibles = [tiposEcuaciones[1], tiposEcuaciones[2]];
+            break;
+        case 2: // Nivel 3: todas las ecuaciones
+            ecuacionesDisponibles = tiposEcuaciones;
+            break;
+        default:
+            ecuacionesDisponibles = tiposEcuaciones;
+    }
+
+    const tipoEcuacion = ecuacionesDisponibles[Math.floor(Math.random() * ecuacionesDisponibles.length)];
+    return tipoEcuacion.generar();
+}
+
 function verificarRespuestas() {
     const respuestas = niveles[nivelActual].preguntas.map((_, index) => {
         const seleccionada = document.querySelector(`input[name="pregunta${index}"]:checked`);
@@ -115,18 +183,24 @@ function verificarRespuestas() {
     const resultado = document.getElementById('resultado');
     
     if (todasCorrectas) {
-        const codigo = Math.floor(Math.random() * 900) + 100;
-        codigosDesbloqueo[nivelActual] = codigo;
+        const ecuacion = generarEcuacionAlgebraica();
+        codigosDesbloqueo[nivelActual] = ecuacion.resultado;
         
         resultado.innerHTML = `
             <div class="correcto">
-                ¡Correcto! Tu código de desbloqueo es: ${codigo}
-                <br>Ingresa este código para avanzar al siguiente nivel.
+                <p>¡Correcto! Para avanzar al siguiente nivel, resuelve esta ecuación:</p>
+                <div class="ecuacion">
+                    ${ecuacion.ecuacion}
+                </div>
+                <p>Encuentra el valor de x</p>
+                <div class="pista-matematica">
+                    Ingresa solo el número (resultado entero)
+                </div>
             </div>
         `;
         
-        // Mostrar el contenedor para ingresar el código
-        document.getElementById('codigo-container').classList.remove('hidden');
+        // Mostrar el contenedor del código y el texto
+        mostrarContenedorCodigo();
         document.getElementById('formulario-container').classList.add('hidden');
     } else {
         resultado.innerHTML = `
@@ -134,13 +208,51 @@ function verificarRespuestas() {
                 Algunas respuestas son incorrectas. Intenta nuevamente.
             </div>
         `;
+        // Asegurar que el contenedor de código permanezca oculto
+        ocultarContenedorCodigo();
     }
 }
 
-function verificarCodigo() {
-    const codigoIngresado = document.getElementById('codigo-input').value;
+// Agregar esta función para crear el efecto matriz
+function createBinaryRain() {
+    const container = document.querySelector('.victory-screen');
+    const characters = '10';
     
-    if (parseInt(codigoIngresado) === codigosDesbloqueo[nivelActual]) {
+    setInterval(() => {
+        const binary = document.createElement('div');
+        binary.className = 'binary';
+        binary.style.left = Math.random() * 100 + 'vw';
+        binary.textContent = characters.charAt(Math.floor(Math.random() * characters.length));
+        container.appendChild(binary);
+        
+        setTimeout(() => {
+            binary.remove();
+        }, 2000);
+    }, 50);
+}
+
+// Modificar la función que muestra la victoria
+function mostrarPantallaVictoria() {
+    const victoryScreen = document.createElement('div');
+    victoryScreen.className = 'victory-screen';
+    
+    victoryScreen.innerHTML = `
+        <div class="victory-title">MISIÓN COMPLETADA</div>
+        <div class="victory-icon">🔓</div>
+        <div class="victory-message">Has superado todos los niveles de seguridad</div>
+        <div class="victory-message">Acceso total concedido</div>
+        <div class="matrix-bg"></div>
+    `;
+    
+    document.body.appendChild(victoryScreen);
+    createBinaryRain();
+}
+
+// Modificar la función verificarCodigo para mostrar la pantalla de victoria
+function verificarCodigo() {
+    const codigoIngresado = parseInt(document.getElementById('codigo-input').value);
+    
+    if (codigoIngresado === codigosDesbloqueo[nivelActual]) {
         if (nivelActual < niveles.length - 1) {
             nivelActual++;
             document.getElementById('resultado').innerHTML = '';
@@ -148,19 +260,28 @@ function verificarCodigo() {
             document.getElementById('formulario-container').classList.remove('hidden');
             mostrarNivel(nivelActual);
         } else {
-            document.getElementById('resultado').innerHTML = `
-                <div class="correcto">
-                    ¡Felicitaciones! Has completado todos los niveles.
-                </div>
-            `;
-            document.getElementById('codigo-container').classList.add('hidden');
+            // Mostrar pantalla de victoria cuando se complete el último nivel
+            mostrarPantallaVictoria();
         }
     } else {
+        // Mantener visible la ecuación y el contenedor de código en caso de error
+        const ecuacionActual = document.querySelector('.ecuacion').textContent;
         document.getElementById('resultado').innerHTML = `
+            <div class="correcto">
+                <p>La respuesta es incorrecta. Intenta nuevamente:</p>
+                <div class="ecuacion">
+                    ${ecuacionActual}
+                </div>
+                <p>Encuentra el valor de x</p>
+                <div class="pista-matematica">
+                    Ingresa solo el número (resultado entero)
+                </div>
+            </div>
             <div class="incorrecto">
-                Código incorrecto. Intenta nuevamente.
+                El valor ingresado no es correcto. ¡Sigue intentando!
             </div>
         `;
+        mostrarContenedorCodigo();
     }
 }
 
@@ -169,4 +290,19 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarNivel(nivelActual);
     document.getElementById('verificar').addEventListener('click', verificarRespuestas);
     document.getElementById('verificar-codigo').addEventListener('click', verificarCodigo);
-}); 
+    
+    // Ocultar inicialmente el contenedor de código y el texto
+    ocultarContenedorCodigo();
+});
+
+// Función para ocultar el contenedor de código
+function ocultarContenedorCodigo() {
+    document.getElementById('codigo-container').style.display = 'none';
+    document.getElementById('texto-codigo').style.display = 'none';
+}
+
+// Función para mostrar el contenedor de código
+function mostrarContenedorCodigo() {
+    document.getElementById('codigo-container').style.display = 'block';
+    document.getElementById('texto-codigo').style.display = 'block';
+} 
