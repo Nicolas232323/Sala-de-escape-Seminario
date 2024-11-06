@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sala de Escape - Redes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Sala de Escape - Redes</h1>
+        <div id="nivel-actual"></div>
+        
+        <div id="formulario-container">
+            <h2 id="titulo-nivel"></h2>
+            <div id="preguntas"></div>
+            <button id="verificar">Verificar Respuestas</button>
+        </div>
+        
+        <div id="resultado"></div>
+        
+        <!-- Nuevo div para el ingreso del código -->
+        <div id="codigo-container" class="hidden">
+            <h3>Ingresa el código para avanzar al siguiente nivel</h3>
+            <input type="number" id="codigo-input" placeholder="Ingresa el código">
+            <button id="verificar-codigo">Verificar Código</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
